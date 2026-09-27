@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conditionals — Aula Ing 3.2</title>
+<style>
+:root{
+  --bg:#f6f4ef; --paper:#ffffff; --ink:#1d2330; --muted:#5b6475; --line:#e4e0d6;
+  --blue:#1f6fd1; --blue-soft:#e8f1fc; --purple:#7a4fb5; --purple-soft:#f2ecfa;
+  --red:#d2412c; --red-soft:#fdeeea; --green:#1e8a5a; --green-soft:#e7f6ee;
+  --amber:#b7791f; --amber-soft:#fdf5e4; --cream:#fdf3d8;
+  --shadow:0 1px 2px rgba(20,25,40,.05),0 6px 24px rgba(20,25,40,.06);
+  --radius:14px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#12151c; --paper:#1a1f29; --ink:#e7e9ee; --muted:#9aa3b5; --line:#2c3342;
+    --blue:#6aa8ff; --blue-soft:#1b2a42; --purple:#b894ec; --purple-soft:#2a2240;
+    --red:#ff7b66; --red-soft:#3a211d; --green:#5fd39c; --green-soft:#16302a;
+    --amber:#f0b54d; --amber-soft:#35291a; --cream:#2a2618;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 24px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:17px/1.7 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased}
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--red),var(--blue),var(--purple));z-index:50}
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);max-width:1240px;margin:0 auto;gap:36px;padding:0 24px}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:32px 0 32px}
+.toc .brand{font-weight:800;font-size:1.05rem;letter-spacing:-.01em;margin-bottom:4px}
+.toc .sub{color:var(--muted);font-size:.85rem;margin-bottom:22px}
+.toc a{display:block;color:var(--muted);text-decoration:none;font-size:.92rem;padding:6px 12px;border-left:2px solid var(--line);line-height:1.4}
+.toc a:hover{color:var(--ink)}
+.toc a.active{color:var(--blue);border-left-color:var(--blue);font-weight:600}
+.toc .grp{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:18px 0 6px 12px;font-weight:700}
+main{padding:40px 0 100px;min-width:0}
+header.hero{background:var(--paper);border-radius:20px;padding:44px 44px 36px;box-shadow:var(--shadow);border:1px solid var(--line);margin-bottom:28px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,var(--blue-soft),transparent 70%)}
+.kicker{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--red);background:var(--red-soft);padding:4px 10px;border-radius:99px}
+h1{font-size:clamp(2rem,4.6vw,3rem);line-height:1.1;margin:14px 0 10px;letter-spacing:-.025em}
+.hero p{color:var(--muted);max-width:62ch;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.chip{font-size:.8rem;padding:5px 11px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--muted)}
+section{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:36px 40px;margin-bottom:24px;scroll-margin-top:20px}
+.sec-num{font-family:var(--mono);font-size:.8rem;color:var(--muted);letter-spacing:.08em}
+h2{font-size:1.65rem;margin:4px 0 18px;letter-spacing:-.015em;line-height:1.25}
+h3{font-size:1.2rem;margin:30px 0 10px;line-height:1.35}
+h4{font-size:1.02rem;margin:22px 0 6px}
+p{margin:0 0 14px}
+ul,ol{padding-left:1.3em;margin:0 0 14px}
+li{margin:4px 0}
+strong{font-weight:700}
+.en{font-style:italic}
+.c-if{color:var(--blue);font-weight:600}
+.c-main{color:var(--purple);font-weight:600}
+.c-red{color:var(--red);font-weight:700}
+.box{border-radius:12px;padding:16px 20px;margin:18px 0;border:1px solid var(--line);background:var(--bg)}
+.box > :last-child{margin-bottom:0}
+.box .t{font-weight:800;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;display:block}
+.box.info{background:var(--blue-soft);border-color:transparent}.box.info .t{color:var(--blue)}
+.box.warn{background:var(--red-soft);border-color:transparent}.box.warn .t{color:var(--red)}
+.box.tip{background:var(--green-soft);border-color:transparent}.box.tip .t{color:var(--green)}
+.box.extra{background:var(--amber-soft);border-color:transparent;border-left:4px solid var(--amber)}.box.extra .t{color:var(--amber)}
+.box.doubt{background:var(--purple-soft);border-color:transparent}.box.doubt .t{color:var(--purple)}
+.src{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:6px;background:var(--blue-soft);color:var(--blue);vertical-align:middle;margin-left:6px}
+.src.ext{background:var(--amber-soft);color:var(--amber)}
+.table-wrap{overflow-x:auto;margin:16px 0;border-radius:12px;border:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;min-width:560px}
+th,td{padding:11px 14px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--bg);font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+tr:last-child td{border-bottom:none}
+pre.diagram{font-family:var(--mono);font-size:.86rem;line-height:1.55;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:18px 20px;overflow-x:auto;margin:16px 0;white-space:pre}
+.formula{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:14px 0}
+.pill{padding:8px 14px;border-radius:9px;font-weight:700;color:#fff;font-size:.95rem}
+.pill.b{background:var(--blue)} .pill.p{background:var(--purple)} .plus{width:30px;height:30px;border-radius:7px;background:var(--red);color:#fff;display:grid;place-items:center;font-weight:800}
+@media (prefers-color-scheme: dark){.pill,.plus{color:#10131a}}
+.cond-card{border:1px solid var(--line);border-radius:14px;padding:6px 22px 18px;margin:22px 0;background:linear-gradient(180deg,var(--cream),transparent 140px)}
+.cond-card h3{margin-top:18px}
+.ex{border-left:3px solid var(--blue);padding:6px 0 6px 14px;margin:12px 0}
+.ex .pt{display:block;color:var(--muted);font-size:.92rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0}
+.mini{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--bg)}
+.mini h4{margin:0 0 6px}
+.mini p:last-child{margin:0}
+.vocab{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:16px 0}
+.vcard{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--bg)}
+.vcard .w{font-size:1.2rem;font-weight:800}
+.vcard .cls{font-size:.75rem;color:var(--muted);font-family:var(--mono)}
+.vcard .tr{color:var(--blue);font-weight:600;margin:4px 0 8px}
+.vcard p{font-size:.93rem;margin:0 0 8px}
+.vcard .ex2{font-size:.9rem;font-style:italic;color:var(--muted)}
+details{border:1px solid var(--line);border-radius:10px;margin:10px 0;background:var(--bg)}
+summary{cursor:pointer;padding:12px 16px;font-weight:600;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";color:var(--blue)}
+details[open] summary::before{content:"▾ "}
+details .ans{padding:0 16px 14px}
+.videos{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin:16px 0}
+a.vid{display:flex;gap:14px;align-items:flex-start;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--bg);transition:transform .15s,border-color .15s}
+a.vid:hover{transform:translateY(-2px);border-color:var(--red)}
+.play{flex:none;width:42px;height:42px;border-radius:10px;background:#e62117;display:grid;place-items:center}
+.play svg{width:16px;height:16px;fill:#fff;margin-left:2px}
+.vid .vt{font-weight:700;line-height:1.35;font-size:.95rem}
+.vid .va{color:var(--muted);font-size:.85rem;margin-top:4px}
+.vid .vw{font-size:.82rem;margin-top:6px;color:var(--muted)}
+.checklist li{list-style:none;position:relative;padding-left:4px}
+.checklist{padding-left:1.4em}
+.checklist li::before{content:"✓";position:absolute;left:-1.2em;color:var(--green);font-weight:800}
+.footer{color:var(--muted);font-size:.85rem;text-align:center;margin-top:30px}
+kbd{font-family:var(--mono);font-size:.85em;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+@media (max-width:980px){
+  .layout{grid-template-columns:1fr;padding:0 16px}
+  nav.toc{position:static;height:auto;padding:20px 0 0}
+  .toc-links{display:flex;flex-wrap:wrap;gap:6px}
+  .toc a{border:1px solid var(--line);border-radius:99px;padding:5px 12px;font-size:.82rem}
+  .toc a.active{border-color:var(--blue)}
+  .toc .grp{display:none}
+  main{padding-top:18px}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  section,header.hero{padding:24px 18px}
+  .grid2,.grid3{grid-template-columns:1fr}
+}
+@media print{nav.toc,#progress{display:none}.layout{display:block}section{box-shadow:none;break-inside:avoid-page}}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="layout">
+
+<nav class="toc" aria-label="Sumário">
+  <div class="brand">Ing 3.2 · Conditionals</div>
+  <div class="sub">Aula completa · 2º ano EM</div>
+  <div class="toc-links">
+    <div class="grp">Aula</div>
+    <a href="#visao">1. Visão geral</a>
+    <a href="#estrutura">2. A estrutura: if clause + main clause</a>
+    <a href="#zero">3. Zero conditional</a>
+    <a href="#first">4. First conditional</a>
+    <a href="#second">5. Second conditional</a>
+    <a href="#third">6. Third conditional</a>
+    <a href="#macete">7. O macete das anotações</a>
+    <a href="#were">8. “Were” para todas as pessoas</a>
+    <a href="#inversao">9. Omitindo o “if” (inversão)</a>
+    <a href="#avancado">10. Aprofundamento</a>
+    <div class="grp">Vocabulário</div>
+    <a href="#vocab">11. Vocabulary · pág. 113</a>
+    <div class="grp">Fixação</div>
+    <a href="#pegadinhas">12. Pegadinhas</a>
+    <a href="#prova">13. O que mais cai</a>
+    <a href="#exercicios">14. Exercícios</a>
+    <a href="#videos">15. Vídeos</a>
+    <a href="#revisao">16. Revisão final</a>
+  </div>
+</nav>
+
+<main>
+
+<header class="hero">
+  <span class="kicker">Inglês · Gramática</span>
+  <h1>Conditionals<br><span style="color:var(--muted);font-weight:600;font-size:.6em">If clauses: condição e resultado</span></h1>
+  <p>Aula feita a partir das suas anotações “Ing 3.2” (texto + quadro “Conditionals”) e do vocabulário da página 113. O que vem do seu material está marcado com <span class="src">Seu material</span>; o que eu acrescentei está marcado com <span class="src ext">Complemento</span> e com a frase “Complemento para melhor compreensão:”.</p>
+  <div class="meta">
+    <span class="chip">1st · 2nd · 3rd conditional</span>
+    <span class="chip">Inversão sem “if”</span>
+    <span class="chip">“were” formal</span>
+    <span class="chip">5 palavras de vocabulário</span>
+    <span class="chip">Exercícios com gabarito</span>
+  </div>
+</header>
+
+<!-- 1 -->
+<section id="visao">
+  <div class="sec-num">01</div>
+  <h2>Visão geral do tema</h2>
+  <p>Uma frase condicional diz: <strong>“se X acontecer / acontecesse / tivesse acontecido, então Y”</strong>. Em inglês, cada tipo de condicional usa uma combinação fixa de tempos verbais, e essa combinação diz ao leitor <strong>o quanto a situação é real</strong> e <strong>de que tempo ela fala</strong>.</p>
+
+  <pre class="diagram">  REAL / PROVÁVEL  ───────────────────────────────►  IRREAL / IMPOSSÍVEL
+
+  1st conditional          2nd conditional           3rd conditional
+  "If it rains             "If I had a car,          "If she had studied,
+   tomorrow, I will         I would drive to          she would have
+   stay home."              work."                    passed the exam."
+
+  futuro possível          presente/futuro           passado que já
+  e provável               imaginário                não dá para mudar</pre>
+
+  <div class="box info"><span class="t">A ideia central da aula</span>
+    <p>Quanto mais “para trás” o verbo da <span class="c-if">if clause</span> vai (presente → passado → past perfect), <strong>mais longe da realidade</strong> fica a situação. O inglês usa o passado gramatical como um jeito de dizer “isso não é real”.</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="estrutura">
+  <div class="sec-num">02</div>
+  <h2>A estrutura: <span class="c-if">If clause</span> + <span class="c-main">Main clause</span> <span class="src">Seu material</span></h2>
+  <p>Suas anotações definem: <strong>“São períodos compostos em que há uma relação condicional articulada entre as orações: If clause + Main clause.”</strong> Vamos destrinchar cada termo.</p>
+
+  <h3>Os termos, um por um</h3>
+  <ul>
+    <li><strong>Período composto</strong>: frase com <strong>mais de uma oração</strong>, ou seja, mais de um verbo conjugado. Exemplo: “Se chover, eu fico em casa” tem dois verbos (<em>chover</em>, <em>fico</em>) → duas orações.</li>
+    <li><strong>If clause</strong> (oração condicional): a parte que traz a <strong>condição</strong>, introduzida por <em>if</em> (“se”). Sozinha, ela fica incompleta: <span class="en">“If it rains tomorrow…”</span> → e aí?</li>
+    <li><strong>Main clause</strong> (oração principal): a parte que traz o <strong>resultado</strong>. Ela faz sentido sozinha: <span class="en">“I will stay home.”</span></li>
+    <li><strong>Relação condicional articulada</strong>: o resultado só acontece (ou aconteceria) <em>se</em> a condição for cumprida. Uma oração depende da outra.</li>
+  </ul>
+
+  <p>No quadro das anotações, isso aparece com as cores: <span class="c-if">CONDITION (azul)</span> = if clause e <span class="c-main">RESULT (roxo)</span> = main clause.</p>
+
+  <pre class="diagram">   ┌──────────── IF CLAUSE ────────────┐   ┌──────── MAIN CLAUSE ────────┐
+   │  If   +  condição                 │ + │  resultado                  │
+   │  (oração subordinada)             │   │  (oração principal)         │
+   └───────────────────────────────────┘   └─────────────────────────────┘
+        "If it rains tomorrow,"                 "I will stay home."</pre>
+
+  <h3>A ordem pode inverter (e a vírgula muda)</h3>
+  <p><strong>Complemento para melhor compreensão:</strong> as duas orações podem trocar de lugar sem mudar o sentido. O que muda é a pontuação.</p>
+  <div class="grid2">
+    <div class="mini"><h4>If clause primeiro → vírgula</h4><p class="en"><span class="c-if">If it rains tomorrow</span>, <span class="c-main">I will stay home.</span></p></div>
+    <div class="mini"><h4>Main clause primeiro → normalmente sem vírgula</h4><p class="en"><span class="c-main">I will stay home</span> <span class="c-if">if it rains tomorrow.</span></p></div>
+  </div>
+  <div class="box tip"><span class="t">Dica de leitura</span>
+    <p>Em textos de prova, a if clause muitas vezes aparece no <strong>final</strong> da frase. Treine o olho para achar o <em>if</em> em qualquer posição e perguntar: “qual é a condição e qual é o resultado?”.</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="zero">
+  <div class="sec-num">03</div>
+  <h2>Zero conditional <span class="src ext">Complemento</span></h2>
+  <p><strong>Complemento para melhor compreensão:</strong> suas anotações trazem só 1st, 2nd e 3rd. Mas existe um tipo anterior, o <strong>zero conditional</strong>, e vale conhecer porque ele aparece em textos (principalmente científicos) e ajuda a entender o first.</p>
+  <div class="formula"><span class="pill b">IF + Present Simple</span><span class="plus">+</span><span class="pill p">Present Simple</span></div>
+  <div class="ex"><span class="en"><span class="c-if">If you heat ice</span>, <span class="c-main">it melts.</span></span><span class="pt">Se você aquece gelo, ele derrete.</span></div>
+  <p><strong>Uso:</strong> verdades gerais, fatos científicos, regras, hábitos. Aqui o <em>if</em> quase significa “<strong>sempre que</strong>” (<em>when/whenever</em>).</p>
+  <div class="grid2">
+    <div class="mini"><h4>Zero</h4><p class="en">If you mix red and blue, you get purple.</p><p>Sempre acontece. Regra geral.</p></div>
+    <div class="mini"><h4>First</h4><p class="en">If it rains tomorrow, I will stay home.</p><p>Uma situação específica no futuro.</p></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="first">
+  <div class="sec-num">04</div>
+  <h2>First conditional <span class="src">Seu material</span></h2>
+  <div class="cond-card">
+    <div class="formula"><span class="pill b">IF + Present Simple</span><span class="plus">+</span><span class="pill p">WILL + Verb</span></div>
+    <div class="ex"><span class="en"><span class="c-if">If it rains tomorrow,</span> <span class="c-main">I will stay home.</span></span><span class="pt">Se chover amanhã, eu vou ficar em casa.</span></div>
+    <p><span class="c-red">Uses:</span> <strong>Real future situations; possible and likely.</strong> → situações <strong>reais</strong> no <strong>futuro</strong>, <strong>possíveis e prováveis</strong>.</p>
+  </div>
+
+  <h3>Por que funciona assim</h3>
+  <p>Quem fala acha que a condição <strong>pode mesmo acontecer</strong>. Chover amanhã é algo realista, então o falante usa tempos “normais”: presente na condição e <em>will</em> no resultado.</p>
+
+  <h3>Como montar, passo a passo</h3>
+  <ol>
+    <li>If clause: <strong>if + sujeito + verbo no present simple</strong>. Atenção à 3ª pessoa do singular: <em>it rain<strong>s</strong></em>, <em>she stud<strong>ies</strong></em>.</li>
+    <li>Main clause: <strong>sujeito + will + verbo no infinitivo sem “to”</strong>: <em>I will stay</em>, <em>she will pass</em>.</li>
+    <li>Negativas: <em>doesn't/don't</em> na if clause; <em>won't</em> (= will not) na main clause.</li>
+  </ol>
+  <div class="ex"><span class="en">If you don't hurry, you'll miss the bus.</span><span class="pt">Se você não se apressar, vai perder o ônibus.</span></div>
+  <div class="ex"><span class="en">If she studies, she won't fail.</span><span class="pt">Se ela estudar, não vai reprovar.</span></div>
+
+  <div class="box warn"><span class="t">Erro nº 1 dos brasileiros</span>
+    <p>Em português dizemos “se <strong>chover</strong>” (futuro do subjuntivo). Em inglês, a if clause do first conditional fica no <strong>presente simples</strong>, <strong>não</strong> leva <em>will</em>.</p>
+    <p>✗ <span class="en">If it <s>will rain</s> tomorrow, I will stay home.</span><br>✓ <span class="en">If it <strong>rains</strong> tomorrow, I will stay home.</span></p>
+  </div>
+
+  <h3>Variações que também são first conditional</h3>
+  <p><strong>Complemento para melhor compreensão:</strong> a main clause não precisa ser sempre <em>will</em>. O que define o first conditional é a <strong>situação real e possível</strong>.</p>
+  <div class="table-wrap"><table>
+    <tr><th>No lugar de will</th><th>Sentido</th><th>Exemplo</th></tr>
+    <tr><td><strong>can</strong></td><td>possibilidade/permissão</td><td class="en">If you finish early, you can go.</td></tr>
+    <tr><td><strong>may / might</strong></td><td>resultado menos certo</td><td class="en">If it rains, the game might be cancelled.</td></tr>
+    <tr><td><strong>should</strong></td><td>conselho</td><td class="en">If you feel sick, you should see a doctor.</td></tr>
+    <tr><td><strong>imperativo</strong></td><td>ordem/instrução</td><td class="en">If you see him, tell him to call me.</td></tr>
+    <tr><td><strong>going to</strong></td><td>plano/previsão</td><td class="en">If it rains, we're going to stay in.</td></tr>
+  </table></div>
+</section>
+
+<!-- 5 -->
+<section id="second">
+  <div class="sec-num">05</div>
+  <h2>Second conditional <span class="src">Seu material</span></h2>
+  <div class="cond-card">
+    <div class="formula"><span class="pill b">IF + Past Simple</span><span class="plus">+</span><span class="pill p">WOULD + Verb</span></div>
+    <div class="ex"><span class="en"><span class="c-if">If I had a car,</span> <span class="c-main">I would drive to work.</span></span><span class="pt">Se eu tivesse um carro, eu iria de carro para o trabalho.</span></div>
+    <p><span class="c-red">Uses:</span> <strong>Unreal or unlikely situations in the present or future.</strong> → situações <strong>irreais</strong> ou <strong>improváveis</strong> no <strong>presente</strong> ou no <strong>futuro</strong>.</p>
+  </div>
+
+  <h3>O ponto que mais confunde: passado que <u>não</u> é passado</h3>
+  <p>“Had” é passado de <em>have</em>, mas a frase <strong>não fala do passado</strong>. Ela fala de <strong>agora</strong>: eu <strong>não tenho</strong> carro hoje. O past simple aqui funciona como um sinal de <strong>distância da realidade</strong>, não de tempo.</p>
+  <pre class="diagram">  "If I had a car, I would drive to work."
+
+   forma do verbo:  had  → passado
+   tempo real:      AGORA (presente)
+   realidade:       I DON'T have a car.  →  I DON'T drive to work.</pre>
+  <p>O português faz algo parecido: “se eu <strong>tivesse</strong>” (pretérito imperfeito do subjuntivo) + “eu <strong>iria</strong>” (futuro do pretérito). A ideia de “imaginar” é a mesma.</p>
+
+  <h3>“Irreal” × “improvável”: as duas leituras do second</h3>
+  <div class="grid2">
+    <div class="mini"><h4>Irreal (contrário ao fato presente)</h4><p class="en">If I were taller, I would play basketball.</p><p>Eu <strong>não sou</strong> alto. Impossível agora.</p></div>
+    <div class="mini"><h4>Improvável (futuro pouco provável)</h4><p class="en">If I won the lottery, I would buy a house.</p><p>Pode acontecer, mas acho <strong>muito difícil</strong>.</p></div>
+  </div>
+
+  <h3>First × Second: a mesma condição, dois olhares</h3>
+  <p><strong>Complemento para melhor compreensão:</strong> a escolha entre first e second depende do <strong>quanto o falante acredita</strong> que aquilo vai acontecer.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Frase</th><th>O que revela sobre quem fala</th></tr>
+    <tr><td class="en">If I <strong>get</strong> the job, I <strong>will</strong> move to São Paulo.</td><td>Acha que tem <strong>chance real</strong> de conseguir a vaga.</td></tr>
+    <tr><td class="en">If I <strong>got</strong> the job, I <strong>would</strong> move to São Paulo.</td><td>Acha <strong>pouco provável</strong> conseguir, ou está só imaginando.</td></tr>
+  </table></div>
+
+  <h3>Montagem e contrações</h3>
+  <ul>
+    <li><strong>would + verbo no infinitivo sem “to”</strong>: <em>would drive</em>, <em>would buy</em>.</li>
+    <li>Contração: <em>I would</em> → <em>I'd</em>; negativa <em>would not</em> → <em>wouldn't</em>.</li>
+    <li><strong>could</strong> (= would be able to) e <strong>might</strong> (= talvez) também servem: <span class="en">If I had more time, I could learn Japanese.</span></li>
+  </ul>
+  <div class="box tip"><span class="t">Frase-modelo para dar conselho</span>
+    <p><span class="en"><strong>If I were you, I would</strong> talk to her.</span> → “Se eu fosse você, eu falaria com ela.” É second conditional porque eu <strong>nunca</strong> serei você (irreal).</p>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="third">
+  <div class="sec-num">06</div>
+  <h2>Third conditional <span class="src">Seu material</span></h2>
+  <div class="cond-card">
+    <div class="formula"><span class="pill b">IF + Past Perfect</span><span class="plus">+</span><span class="pill p">WOULD HAVE + Past Participle</span></div>
+    <div class="ex"><span class="en"><span class="c-if">If she had studied,</span> <span class="c-main">she would have passed the exam.</span></span><span class="pt">Se ela tivesse estudado, ela teria passado na prova.</span></div>
+    <p><span class="c-red">Uses:</span> <strong>Unreal situations in the past; regrets.</strong> → situações <strong>irreais no passado</strong>; <strong>arrependimentos</strong>.</p>
+  </div>
+
+  <h3>Termos técnicos antes de tudo</h3>
+  <ul>
+    <li><strong>Past perfect</strong> = <em>had</em> + particípio passado (<em>had studied</em>, <em>had gone</em>, <em>had known</em>). Equivale ao “tinha/tivesse + particípio”.</li>
+    <li><strong>Past participle</strong> (particípio passado) = 3ª coluna da tabela de verbos: <em>go – went – <strong>gone</strong></em>; <em>study – studied – <strong>studied</strong></em>; <em>pass – passed – <strong>passed</strong></em>.</li>
+  </ul>
+
+  <h3>Por que é “irreal” e por que expressa arrependimento</h3>
+  <p>O passado <strong>já aconteceu</strong> e não muda. Então o third conditional imagina um passado <strong>diferente</strong> do que aconteceu, e o resultado imaginário que teria vindo dele.</p>
+  <pre class="diagram">  "If she had studied, she would have passed the exam."
+
+   O QUE A FRASE IMAGINA          O QUE DE FATO ACONTECEU
+   ───────────────────────        ───────────────────────
+   ela estudou            ✗  →    she DIDN'T study
+   ela passou             ✗  →    she DIDN'T pass
+
+   → sentimento típico: arrependimento, crítica, "e se…"</pre>
+
+  <div class="box info"><span class="t">Regra de ouro de interpretação</span>
+    <p>No third conditional, <strong>inverta o sinal</strong> das duas orações para descobrir o fato real: afirmativa na frase → negativa na realidade, e vice-versa.</p>
+    <p class="en">If I hadn't overslept, I wouldn't have missed the train.<br>→ Realidade: I <strong>overslept</strong> and I <strong>missed</strong> the train.</p>
+  </div>
+
+  <h3>Contrações: a armadilha do <kbd>'d</kbd></h3>
+  <p><strong>Complemento para melhor compreensão:</strong> na fala e em textos informais, o third conditional vira isto:</p>
+  <div class="ex"><span class="en">If I<strong>'d</strong> known, I<strong>'d</strong> have told you.</span><span class="pt">= If I <strong>had</strong> known, I <strong>would</strong> have told you.</span></div>
+  <p>O mesmo <kbd>'d</kbd> vale <em>had</em> na if clause e <em>would</em> na main clause. Como saber? Olhe o que vem depois:</p>
+  <ul>
+    <li><kbd>'d</kbd> + <strong>particípio</strong> (<em>'d known</em>) → é <strong>had</strong>.</li>
+    <li><kbd>'d</kbd> + <strong>have</strong> ou verbo no infinitivo (<em>'d have told</em>, <em>'d go</em>) → é <strong>would</strong>.</li>
+  </ul>
+  <p>Na fala, <em>would have</em> também vira <em>would've</em> (soa como “would of”, mas o certo é <strong>have</strong>). Com <em>could have</em> e <em>might have</em> o sentido muda: <span class="en">If she had studied, she <strong>might have</strong> passed</span> = talvez tivesse passado.</p>
+</section>
+
+<!-- 7 -->
+<section id="macete">
+  <div class="sec-num">07</div>
+  <h2>O macete das anotações <span class="src">Seu material</span></h2>
+  <p>Suas anotações trazem: <strong>“Macete: 1st = future, 2nd = past, 3rd = further past”</strong>.</p>
+
+  <div class="box doubt"><span class="t">Como interpretar (leitura mais provável)</span>
+    <p>O macete funciona melhor se for lido como <strong>o tempo do verbo usado</strong>, ou como a “descida” de um degrau a cada tipo:</p>
+    <ul>
+      <li><strong>1st = future</strong> → fala do <strong>futuro</strong> real (e tem <em>will</em> na main clause).</li>
+      <li><strong>2nd = past</strong> → a if clause usa o <strong>past simple</strong> (<em>had</em>).</li>
+      <li><strong>3rd = further past</strong> → a if clause vai um passo <strong>mais para trás</strong>: <strong>past perfect</strong> (<em>had studied</em>), o “passado do passado”.</li>
+    </ul>
+    <p>Não é possível confirmar pela anotação qual das leituras o professor quis. Esta é a que bate com o quadro.</p>
+  </div>
+
+  <pre class="diagram">  FORMA DO VERBO NA IF CLAUSE (desce um degrau a cada tipo)
+
+  1st  ─  present simple   "If it rains"        (futuro real)
+           │  ↓ um passo para trás
+  2nd  ─  past simple      "If I had"           (presente/futuro irreal)
+           │  ↓ mais um passo
+  3rd  ─  past perfect     "If she had studied" (passado irreal)</pre>
+
+  <div class="box warn"><span class="t">Cuidado com o macete</span>
+    <p>“2nd = past” é sobre a <strong>forma</strong> do verbo, <strong>não</strong> sobre o tempo em que a situação acontece. O second conditional fala do <strong>presente ou futuro</strong>. Quem lê “2nd = past” como “fala do passado” erra a interpretação. Quem fala do passado é o <strong>third</strong>.</p>
+  </div>
+</section>
+
+<!-- 8 -->
+<section id="were">
+  <div class="sec-num">08</div>
+  <h2>“Were” para todas as pessoas <span class="src">Seu material</span></h2>
+  <p>Suas anotações: <strong>“Em situações formais, were sempre é usado para todas as pessoas.”</strong></p>
+  <p>No passado normal, <em>be</em> tem duas formas: <em>I/he/she/it <strong>was</strong></em> e <em>you/we/they <strong>were</strong></em>. Mas na if clause do <strong>second conditional</strong>, a forma considerada correta/formal é <strong>were para todo mundo</strong>:</p>
+  <div class="table-wrap"><table>
+    <tr><th>Pessoa</th><th>Formal / padrão de prova</th><th>Informal (fala do dia a dia)</th></tr>
+    <tr><td>I</td><td class="en">If I <strong>were</strong> rich…</td><td class="en">If I was rich…</td></tr>
+    <tr><td>he / she / it</td><td class="en">If she <strong>were</strong> here…</td><td class="en">If she was here…</td></tr>
+    <tr><td>you / we / they</td><td class="en">If they <strong>were</strong> late…</td><td class="en">(igual: were)</td></tr>
+  </table></div>
+  <p><strong>Complemento para melhor compreensão:</strong> esse <em>were</em> é chamado de <strong>subjuntivo</strong> (<em>subjunctive</em>), um modo verbal que indica situação hipotética, igual ao nosso “se eu <strong>fosse</strong>”. Na expressão fixa <span class="en">“If I were you”</span>, use sempre <em>were</em>.</p>
+  <div class="box tip"><span class="t">Na prova</span>
+    <p>Se a questão pede a forma “correta” ou “formal”, marque <strong>were</strong>. Se aparecer <em>was</em> num texto autêntico (entrevista, diálogo), não é erro. É registro informal.</p>
+  </div>
+</section>
+
+<!-- 9 -->
+<section id="inversao">
+  <div class="sec-num">09</div>
+  <h2>Omitindo o “if”: inversão <span class="src">Seu material</span></h2>
+  <p>Suas anotações: <strong>“É possível omitir o if da If clause colocando o verbo antes do sujeito.”</strong> Isso se chama <strong>inversão</strong> (<em>inversion</em>): o verbo auxiliar “pula” para antes do sujeito, como numa pergunta, e o <em>if</em> desaparece. O resultado soa <strong>formal</strong> (textos escritos, contratos, discursos, literatura).</p>
+
+  <pre class="diagram">   If  she  had  studied, …          (normal)
+       │    │
+       └─┐  └──── o auxiliar "had" vai para a frente
+         ▼
+   ✂ If  Had  she  studied, …         (inversão: sem "if")</pre>
+
+  <h3>Os dois exemplos das anotações</h3>
+  <div class="ex"><span class="en"><strong>Had she studied</strong>, she would have passed the exam.</span><span class="pt">= If she had studied, she would have passed the exam. (third conditional) ✓ uso padrão e muito comum.</span></div>
+  <div class="ex" style="border-color:var(--amber)"><span class="en"><strong>Had I a car</strong>, I would drive to work.</span><span class="pt">= If I had a car, I would drive to work. (second conditional)</span></div>
+
+  <div class="box doubt"><span class="t">Atenção a este exemplo: “Had I a car”</span>
+    <p>Ele não está “errado”, mas soa <strong>arcaico/literário</strong> no inglês atual. Aqui <em>had</em> é <strong>verbo principal</strong> (“ter”), não auxiliar, e hoje quase ninguém inverte o verbo principal <em>have</em>. As fontes de gramática de referência (ex.: British Council) só trazem a inversão do second conditional com <strong>were</strong>.</p>
+    <p><strong>Complemento para melhor compreensão:</strong> a forma moderna e formal para o second conditional invertido é:</p>
+    <p class="en"><strong>Were I to have</strong> a car, I would drive to work.<br><strong>Were I</strong> rich, I would travel the world. (com o verbo <em>be</em>, basta inverter)</p>
+    <p>Se a prova trouxer “Had I a car”, você entende: é o second conditional invertido. Mas para escrever, prefira <em>If I had a car</em> ou <em>Were I to have a car</em>.</p>
+  </div>
+
+  <h3>Quadro completo da inversão</h3>
+  <p><strong>Complemento para melhor compreensão:</strong> cada tipo de conditional tem o seu auxiliar de inversão.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Tipo</th><th>Auxiliar</th><th>Normal</th><th>Invertido</th></tr>
+    <tr><td><strong>1st</strong></td><td><strong>Should</strong></td><td class="en">If you need help, call me.</td><td class="en"><strong>Should you need</strong> help, call me.</td></tr>
+    <tr><td><strong>2nd</strong></td><td><strong>Were</strong> (+ to)</td><td class="en">If I were rich, I'd travel.<br>If he knew, he'd help.</td><td class="en"><strong>Were I</strong> rich, I'd travel.<br><strong>Were he to know</strong>, he'd help.</td></tr>
+    <tr><td><strong>3rd</strong></td><td><strong>Had</strong></td><td class="en">If I had known, I'd have come.</td><td class="en"><strong>Had I known</strong>, I'd have come.</td></tr>
+  </table></div>
+  <div class="box warn"><span class="t">Negativa na inversão</span>
+    <p>O <em>not</em> vem <strong>depois do sujeito</strong> e <strong>não</strong> contrai:</p>
+    <p>✓ <span class="en">Had she <strong>not</strong> studied, she would have failed.</span><br>✗ <span class="en"><s>Hadn't she studied</s>, she would have failed.</span> (vira pergunta, não condição)</p>
+  </div>
+  <div class="box tip"><span class="t">Como reconhecer no texto</span>
+    <p>Frase que <strong>começa com Had/Should/Were + sujeito</strong>, <strong>sem ponto de interrogação</strong>, seguida de vírgula e de uma oração com <em>would</em> ou imperativo → é uma condicional invertida. Leia mentalmente com “if”.</p>
+  </div>
+</section>
+
+<!-- 10 -->
+<section id="avancado">
+  <div class="sec-num">10</div>
+  <h2>Aprofundamento <span class="src ext">Complemento</span></h2>
+  <p><strong>Complemento para melhor compreensão:</strong> nada desta seção está nas suas anotações. É a parte que separa quem “decorou a tabela” de quem entende conditionals em textos reais.</p>
+
+  <h3>10.1 Mixed conditionals (condicionais mistas)</h3>
+  <p>A condição está num tempo e o resultado em outro. As duas mais comuns:</p>
+  <div class="table-wrap"><table>
+    <tr><th>Combinação</th><th>Estrutura</th><th>Exemplo</th><th>Sentido</th></tr>
+    <tr><td>Passado → presente</td><td>if + past perfect, <strong>would + verb</strong></td><td class="en">If I had studied medicine, I would be a doctor now.</td><td>Não estudei medicina (passado) → não sou médico (hoje).</td></tr>
+    <tr><td>Presente → passado</td><td>if + past simple, <strong>would have + participle</strong></td><td class="en">If I spoke French, I would have understood the film.</td><td>Não falo francês (sempre) → não entendi o filme (ontem).</td></tr>
+  </table></div>
+  <p>Pista: palavras de tempo como <em>now</em>, <em>today</em>, <em>yesterday</em> dentro da frase mostram que ela mistura tempos.</p>
+
+  <h3>10.2 Outras palavras que introduzem condição</h3>
+  <div class="table-wrap"><table>
+    <tr><th>Conectivo</th><th>Significado</th><th>Exemplo</th></tr>
+    <tr><td><strong>unless</strong></td><td>a menos que / se não (= if … not)</td><td class="en">You'll fail <strong>unless</strong> you study. = …if you don't study.</td></tr>
+    <tr><td><strong>provided (that) / providing</strong></td><td>desde que, contanto que</td><td class="en">You can go <strong>provided</strong> you finish your homework.</td></tr>
+    <tr><td><strong>as long as / so long as</strong></td><td>contanto que, enquanto</td><td class="en">I'll help you <strong>as long as</strong> you try.</td></tr>
+    <tr><td><strong>on condition that</strong></td><td>sob a condição de que</td><td class="en">He agreed <strong>on condition that</strong> he was paid.</td></tr>
+    <tr><td><strong>in case</strong></td><td>caso / por precaução <strong>(≠ if)</strong></td><td class="en">Take an umbrella <strong>in case</strong> it rains. (leve de qualquer jeito)</td></tr>
+    <tr><td><strong>otherwise</strong></td><td>senão, caso contrário</td><td class="en">Hurry, <strong>otherwise</strong> you'll be late.</td></tr>
+    <tr><td><strong>but for / without</strong></td><td>não fosse por, sem</td><td class="en"><strong>But for</strong> your help, I would have failed.</td></tr>
+    <tr><td><strong>suppose / supposing / imagine</strong></td><td>suponha que</td><td class="en"><strong>Supposing</strong> you lost your job, what would you do?</td></tr>
+  </table></div>
+  <div class="box warn"><span class="t">Unless já é negativo</span>
+    <p>✗ <span class="en"><s>Unless you don't study</s>, you'll fail.</span> (dupla negação)<br>✓ <span class="en">Unless you study, you'll fail.</span></p>
+  </div>
+
+  <h3>10.3 “Wish” e “If only”: os primos do second e do third</h3>
+  <p>Para expressar desejo ou arrependimento, os tempos verbais seguem a mesma lógica de “um passo para trás”:</p>
+  <div class="grid2">
+    <div class="mini"><h4>Desejo sobre o presente → past simple</h4><p class="en">I wish I <strong>had</strong> a car. / If only I <strong>were</strong> taller.</p><p>(= não tenho / não sou)</p></div>
+    <div class="mini"><h4>Arrependimento sobre o passado → past perfect</h4><p class="en">I wish I <strong>had studied</strong>. / If only she <strong>had listened</strong>.</p><p>(= não estudei / ela não ouviu)</p></div>
+  </div>
+
+  <h3>10.4 “Will/would” na if clause: a exceção</h3>
+  <p>A regra “sem will na if clause” tem exceção: quando <em>will/would</em> significam <strong>vontade/disposição</strong> (pedido educado), não futuro.</p>
+  <p class="en">If you <strong>will</strong> wait here, I'll call the manager. (= se você fizer a gentileza de esperar)<br>I'd be grateful if you <strong>would</strong> reply soon.</p>
+</section>
+
+<!-- 11 -->
+<section id="vocab">
+  <div class="sec-num">11</div>
+  <h2>Vocabulary · pág. 113 <span class="src">Seu material</span></h2>
+  <p>Suas anotações trazem cinco itens da página 113. O texto da página <strong>não foi enviado</strong>, então não sei em que frases eles aparecem. Pelo conjunto (<em>smog</em>, <em>curtailing</em>, <em>amended</em>), o texto <strong>provavelmente</strong> trata de <strong>poluição/meio ambiente e leis</strong>, mas isso é uma suposição. Abaixo, a tradução das anotações e, como complemento, a classe gramatical, a explicação e exemplos meus.</p>
+
+  <div class="vocab">
+    <div class="vcard">
+      <div class="w">Smog</div><div class="cls">noun (substantivo)</div>
+      <div class="tr">nevoeiro de poluição</div>
+      <p><strong>Complemento:</strong> palavra formada pela junção de <em><strong>sm</strong>oke</em> (fumaça) + <em>f<strong>og</strong></em> (neblina). É a névoa escura de poluentes sobre grandes cidades.</p>
+      <p class="ex2">São Paulo is often covered in smog during the dry season.</p>
+    </div>
+    <div class="vcard">
+      <div class="w">Disregard</div><div class="cls">noun / verb</div>
+      <div class="tr">desrespeito, descaso</div>
+      <p><strong>Complemento:</strong> como substantivo, costuma vir com <em>for</em>: <em>disregard <strong>for</strong> something</em>. Como verbo, significa “desconsiderar, ignorar”. Prefixo <em>dis-</em> = negação + <em>regard</em> = consideração.</p>
+      <p class="ex2">The company showed a total disregard for the environment.</p>
+    </div>
+    <div class="vcard">
+      <div class="w">Amended</div><div class="cls">verb, past / past participle de <em>amend</em></div>
+      <div class="tr">corrigiu, emendou</div>
+      <p><strong>Complemento:</strong> muito usado para <strong>leis, contratos e textos oficiais</strong> (alterar formalmente). Daí vem <em>amendment</em> (emenda constitucional). Não confunda com <em>make amends</em> (reparar um erro com alguém).</p>
+      <p class="ex2">The government amended the law to reduce emissions.</p>
+    </div>
+    <div class="vcard">
+      <div class="w">Curtailing</div><div class="cls">verb, forma -ing de <em>curtail</em></div>
+      <div class="tr">reducing (reduzindo)</div>
+      <p><strong>Complemento:</strong> <em>curtail</em> = reduzir, restringir, limitar, geralmente algo que já existe (gastos, direitos, emissões). Mais formal que <em>reduce</em> e <em>cut</em>.</p>
+      <p class="ex2">The new policy aims at curtailing car use in city centres.</p>
+    </div>
+    <div class="vcard">
+      <div class="w">Bear in mind</div><div class="cls">expressão (phrasal/idiom)</div>
+      <div class="tr">ter em mente</div>
+      <p><strong>Complemento:</strong> sinônimo de <em>keep in mind</em>. <em>Bear</em> é irregular: <em>bear – bore – borne</em>. Aqui não tem nada a ver com “urso” (<em>bear</em> substantivo).</p>
+      <p class="ex2">Bear in mind that the exam starts at 8 a.m.</p>
+    </div>
+  </div>
+
+  <div class="box tip"><span class="t">Conectando vocabulário e gramática</span>
+    <p>Textos sobre meio ambiente estão cheios de conditionals. Veja três frases com o vocabulário da página:</p>
+    <p class="en">If cities <strong>curtail</strong> car use, <strong>smog</strong> will decrease. <span style="color:var(--muted);font-style:normal">(1st)</span><br>
+    If the law <strong>were amended</strong>, factories would pollute less. <span style="color:var(--muted);font-style:normal">(2nd, voz passiva)</span><br>
+    Had they not shown such <strong>disregard</strong> for the rules, the river would not have been polluted. <span style="color:var(--muted);font-style:normal">(3rd, invertido)</span></p>
+  </div>
+</section>
+
+<!-- 12 -->
+<section id="pegadinhas">
+  <div class="sec-num">12</div>
+  <h2>Pontos de atenção e pegadinhas</h2>
+  <div class="table-wrap"><table>
+    <tr><th>#</th><th>Erro comum</th><th>Correção / explicação</th></tr>
+    <tr><td>1</td><td class="en">If it <s>will rain</s>, I will stay home.</td><td>Sem <em>will</em> na if clause: <em>If it <strong>rains</strong></em>.</td></tr>
+    <tr><td>2</td><td class="en">If I <s>would have</s> a car, I would drive.</td><td>Sem <em>would</em> na if clause: <em>If I <strong>had</strong></em>.</td></tr>
+    <tr><td>3</td><td class="en">If she <s>would have studied</s>, she would have passed.</td><td>If clause usa past perfect: <em>If she <strong>had studied</strong></em>.</td></tr>
+    <tr><td>4</td><td>Achar que o second fala do passado por causa do <em>had</em>.</td><td>Second = presente/futuro irreal. Passado irreal = third.</td></tr>
+    <tr><td>5</td><td class="en">If she had studied, she would <s>have pass</s>.</td><td>Depois de <em>would have</em> vem o <strong>particípio</strong>: <em>would have <strong>passed</strong></em>.</td></tr>
+    <tr><td>6</td><td>Ler <kbd>'d</kbd> sempre como <em>would</em>.</td><td><kbd>'d</kbd> + particípio = <em>had</em>; <kbd>'d</kbd> + have/verbo = <em>would</em>.</td></tr>
+    <tr><td>7</td><td>Achar que “Had she studied, …” é pergunta.</td><td>Sem “?”, com vírgula e <em>would</em> → condicional invertida.</td></tr>
+    <tr><td>8</td><td class="en"><s>Hadn't</s> she studied, …</td><td>Na inversão o <em>not</em> não contrai: <em>Had she <strong>not</strong> studied</em>.</td></tr>
+    <tr><td>9</td><td class="en">Unless you <s>don't</s> study…</td><td><em>Unless</em> já é negativo: <em>Unless you study</em>.</td></tr>
+    <tr><td>10</td><td>Tratar <em>in case</em> como <em>if</em>.</td><td><em>In case</em> = por precaução. A ação acontece de qualquer forma.</td></tr>
+    <tr><td>11</td><td>Traduzir <em>if</em> sempre por “se” e perder o sentido.</td><td>No zero conditional, <em>if</em> ≈ “sempre que”. Às vezes, “caso”.</td></tr>
+  </table></div>
+</section>
+
+<!-- 13 -->
+<section id="prova">
+  <div class="sec-num">13</div>
+  <h2>O que mais cai em prova</h2>
+  <p><strong>Complemento para melhor compreensão:</strong> no ENEM e nos vestibulares mais concorridos que cobram inglês (como a FUVEST e a Unesp), a prova de inglês é essencialmente de <strong>leitura e interpretação de texto</strong>. Raramente pedem “complete com o tempo verbal”. O que cobram é você <strong>entender o que a frase condicional diz sobre a realidade</strong>. Vestibulares de outros formatos e provas escolares ainda cobram a estrutura diretamente.</p>
+
+  <div class="grid3">
+    <div class="mini"><h4>① Inferir a realidade</h4><p>“If the government had acted earlier, thousands would have been saved.” → O governo <strong>não</strong> agiu cedo; milhares <strong>não</strong> foram salvos.</p></div>
+    <div class="mini"><h4>② Grau de certeza</h4><p>Distinguir o que o autor acha provável (1st) do que acha improvável ou impossível (2nd/3rd).</p></div>
+    <div class="mini"><h4>③ Função da oração</h4><p>“A oração introduzida por <em>unless/provided</em> expressa…” → <strong>condição</strong>.</p></div>
+    <div class="mini"><h4>④ Reescrita equivalente</h4><p>Qual alternativa mantém o sentido? <em>Had I known</em> = <em>If I had known</em>; <em>Unless</em> = <em>If … not</em>.</p></div>
+    <div class="mini"><h4>⑤ Estrutura (provas escolares)</h4><p>Completar lacunas com o tempo correto nos três tipos. Vale ter as fórmulas decoradas.</p></div>
+    <div class="mini"><h4>⑥ Vocabulário em contexto</h4><p>Textos ambientais e jurídicos (<em>smog</em>, <em>curtail</em>, <em>amend</em>) são típicos.</p></div>
+  </div>
+
+  <div class="box info"><span class="t">Tabela de interpretação: decore esta</span>
+    <div class="table-wrap" style="margin-bottom:0"><table>
+      <tr><th>Tipo</th><th>Frase</th><th>Tempo real</th><th>O que é verdade</th></tr>
+      <tr><td>1st</td><td class="en">If it rains tomorrow, I will stay home.</td><td>futuro</td><td>Pode chover; é realista.</td></tr>
+      <tr><td>2nd</td><td class="en">If I had a car, I would drive to work.</td><td>presente</td><td>Não tenho carro; não vou de carro.</td></tr>
+      <tr><td>3rd</td><td class="en">If she had studied, she would have passed.</td><td>passado</td><td>Ela não estudou; não passou.</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- 14 -->
+<section id="exercicios">
+  <div class="sec-num">14</div>
+  <h2>Exercícios com gabarito</h2>
+  <p>Tente responder antes de abrir. Clique em cada item para ver a resposta.</p>
+
+  <h3>A. Identifique o tipo</h3>
+  <details><summary>1. If you drop a glass, it breaks.</summary><div class="ans"><strong>Zero conditional</strong>: fato geral (present + present).</div></details>
+  <details><summary>2. If they had left earlier, they wouldn't have missed the flight.</summary><div class="ans"><strong>Third</strong>: past perfect + would have + particípio. Realidade: saíram tarde e perderam o voo.</div></details>
+  <details><summary>3. If I were the president, I would invest in education.</summary><div class="ans"><strong>Second</strong>: irreal no presente. Note o <em>were</em> formal com <em>I</em>.</div></details>
+  <details><summary>4. If she calls, I'll tell her the news.</summary><div class="ans"><strong>First</strong>: futuro real/possível.</div></details>
+
+  <h3>B. Complete com a forma correta</h3>
+  <details><summary>5. If it ______ (rain) tomorrow, the match ______ (be) cancelled.</summary><div class="ans"><strong>rains / will be</strong> (first conditional).</div></details>
+  <details><summary>6. If I ______ (know) his number, I ______ (call) him right now.</summary><div class="ans"><strong>knew / would call</strong>. Second: eu não sei o número agora.</div></details>
+  <details><summary>7. If we ______ (take) a taxi, we ______ (arrive) on time yesterday.</summary><div class="ans"><strong>had taken / would have arrived</strong>. Third: passado irreal.</div></details>
+
+  <h3>C. Reescreva sem “if” (inversão)</h3>
+  <details><summary>8. If I had known about the meeting, I would have gone.</summary><div class="ans"><strong>Had I known</strong> about the meeting, I would have gone.</div></details>
+  <details><summary>9. If you need any help, please contact us.</summary><div class="ans"><strong>Should you need</strong> any help, please contact us.</div></details>
+  <details><summary>10. If she were here, she would know what to do.</summary><div class="ans"><strong>Were she</strong> here, she would know what to do.</div></details>
+
+  <h3>D. Interpretação (estilo vestibular)</h3>
+  <details><summary>11. “Had the factory curtailed its emissions, the city would not have suffered from such heavy smog.” O que se pode concluir?</summary><div class="ans">A fábrica <strong>não reduziu</strong> as emissões e a cidade <strong>sofreu</strong> com smog pesado. É um third conditional invertido (<em>Had the factory curtailed</em> = <em>If the factory had curtailed</em>).</div></details>
+  <details><summary>12. “If I had studied medicine, I would be a doctor now.” Qual tipo e o que é verdade?</summary><div class="ans"><strong>Mixed conditional</strong> (passado → presente). Eu não estudei medicina e hoje não sou médico.</div></details>
+  <details><summary>13. Qual frase tem sentido equivalente a “You won't pass unless you study harder”?</summary><div class="ans"><strong>If you don't study harder, you won't pass.</strong> (<em>unless</em> = <em>if … not</em>)</div></details>
+</section>
+
+<!-- 15 -->
+<section id="videos">
+  <div class="sec-num">15</div>
+  <h2>Vídeos completos no YouTube</h2>
+  <p>Cada botão abre <strong>direto o vídeo</strong>. Confirmei em 26/09/2026, pela consulta pública do YouTube (oEmbed), que todos existem e são públicos, com o título e o canal abaixo. Não consegui assistir aos vídeos para conferir duração e qualidade do conteúdo.</p>
+
+  <h3>Aulas completas (em português)</h3>
+  <div class="videos">
+    <a class="vid" href="https://www.youtube.com/watch?v=nuPzhjBhb8U" target="_blank" rel="noopener">
+      <span class="play"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg></span>
+      <span><span class="vt">ENTENDA TUDO sobre as CONDITIONALS em INGLÊS [If Clauses]</span><span class="va" style="display:block">Cintya Sabino</span><span class="vw" style="display:block">Visão geral dos tipos. Bom para começar.</span></span>
+    </a>
+    <a class="vid" href="https://www.youtube.com/watch?v=YWmySlrwnEw" target="_blank" rel="noopener">
+      <span class="play"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg></span>
+      <span><span class="vt">CONDICIONAIS no Inglês - AULÃO COMPLETO! IF clauses - Zero, Primeira, Segunda e Terceira condicional</span><span class="va" style="display:block">Inglês Minuto</span><span class="vw" style="display:block">Aulão cobrindo do zero ao third.</span></span>
+    </a>
+    <a class="vid" href="https://www.youtube.com/watch?v=VWxtsks6mgg" target="_blank" rel="noopener">
+      <span class="play"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg></span>
+      <span><span class="vt">IF CLAUSES | Resumo de Inglês para o Enem</span><span class="va" style="display:block">Curso Enem Gratuito</span><span class="vw" style="display:block">Foco em prova (ENEM/vestibular).</span></span>
+    </a>
+  </div>
+
+  <h3>Em inglês (para treinar o ouvido também)</h3>
+  <div class="videos">
+    <a class="vid" href="https://www.youtube.com/watch?v=veTo6eWJQrM" target="_blank" rel="noopener">
+      <span class="play"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg></span>
+      <span><span class="vt">Learn English Grammar: The 4 Conditionals</span><span class="va" style="display:block">Learn English with Gill · engVid</span><span class="vw" style="display:block">Zero, first, second e third, com calma.</span></span>
+    </a>
+    <a class="vid" href="https://www.youtube.com/watch?v=ap1HTyfI-n8" target="_blank" rel="noopener">
+      <span class="play"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg></span>
+      <span><span class="vt">How to Make Inverted Conditional Sentences in English | Intermediate English Lesson</span><span class="va" style="display:block">Clark and Miller Online English</span><span class="vw" style="display:block">Inversão (Had / Should / Were), a parte das anotações.</span></span>
+    </a>
+    <a class="vid" href="https://www.youtube.com/watch?v=4OXIOZJUojc" target="_blank" rel="noopener">
+      <span class="play"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg></span>
+      <span><span class="vt">Mastering Inverted Conditionals for C1/C2 Exams | Advanced English Grammar</span><span class="va" style="display:block">English with Em</span><span class="vw" style="display:block">Aprofundamento avançado da inversão.</span></span>
+    </a>
+  </div>
+</section>
+
+<!-- 16 -->
+<section id="revisao">
+  <div class="sec-num">16</div>
+  <h2>Revisão final dos conceitos principais</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Tipo</th><th><span class="c-if">If clause</span></th><th><span class="c-main">Main clause</span></th><th>Uso</th><th>Inversão</th></tr>
+    <tr><td><strong>Zero</strong>*</td><td>present simple</td><td>present simple</td><td>verdades gerais</td><td>—</td></tr>
+    <tr><td><strong>1st</strong></td><td>present simple</td><td>will + verb</td><td>futuro real, possível e provável</td><td>Should + suj.</td></tr>
+    <tr><td><strong>2nd</strong></td><td>past simple (<em>were</em>)</td><td>would + verb</td><td>irreal/improvável no presente ou futuro</td><td>Were + suj. (+ to)</td></tr>
+    <tr><td><strong>3rd</strong></td><td>past perfect</td><td>would have + past participle</td><td>irreal no passado; arrependimentos</td><td>Had + suj.</td></tr>
+  </table></div>
+  <p style="font-size:.85rem;color:var(--muted)">* Zero conditional e a coluna “Inversão” para 1st/2nd são complemento; o resto está no seu material.</p>
+
+  <ul class="checklist">
+    <li>Condicional = período composto: <strong>if clause</strong> (condição) + <strong>main clause</strong> (resultado). A ordem pode trocar; com if primeiro, use vírgula.</li>
+    <li><strong>Nunca</strong> <em>will</em> ou <em>would</em> na if clause (salvo o sentido de “gentileza/vontade”).</li>
+    <li>Macete: 1st = future, 2nd = past, 3rd = further past → é a <strong>forma</strong> do verbo que recua, não necessariamente o tempo da situação.</li>
+    <li>Second conditional usa passado, mas fala do <strong>presente/futuro</strong>.</li>
+    <li>Third conditional: inverta o sinal para achar o fato real (<em>had studied</em> → não estudou).</li>
+    <li>Formal: <strong>were</strong> para todas as pessoas (<em>If I were you</em>).</li>
+    <li>Sem “if”: auxiliar antes do sujeito → <strong>Had I known</strong>, <strong>Were I</strong>, <strong>Should you</strong>. “Had I a car” é possível, mas arcaico.</li>
+    <li>Vocabulário p. 113: <strong>smog</strong> (nevoeiro de poluição), <strong>disregard</strong> (descaso), <strong>amended</strong> (emendou/corrigiu), <strong>curtailing</strong> (reduzindo), <strong>bear in mind</strong> (ter em mente).</li>
+  </ul>
+
+  <div class="box tip"><span class="t">Teste de 10 segundos</span>
+    <p>Se você consegue explicar, sem olhar, por que <span class="en">“If I had a car”</span> fala do presente e <span class="en">“If she had studied”</span> fala do passado, dominou o núcleo da aula.</p>
+  </div>
+</section>
+
+<p class="footer">Aula gerada a partir de “Ing 3.2” · Conditionals + Vocabulary (pág. 113)</p>
+</main>
+</div>
+
+<script>
+(function(){
+  var bar=document.getElementById('progress');
+  var links=[].slice.call(document.querySelectorAll('.toc a'));
+  var secs=links.map(function(a){return document.querySelector(a.getAttribute('href'))});
+  function onScroll(){
+    var h=document.documentElement, max=h.scrollHeight-h.clientHeight;
+    bar.style.width=(max>0?(h.scrollTop/max*100):0)+'%';
+    var cur=0;
+    for(var i=0;i<secs.length;i++){ if(secs[i] && secs[i].getBoundingClientRect().top<140) cur=i; }
+    links.forEach(function(a,i){a.classList.toggle('active',i===cur)});
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+})();
+</script>
+</body>
+</html>
